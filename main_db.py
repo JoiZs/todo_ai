@@ -1,5 +1,5 @@
 import psycopg2
-from typing import List, Tuple, Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -46,10 +46,12 @@ class Db_psql:
                 (name, is_done, todo_id),
             )
         elif name is not None:
-            self.cur.execute("UPDATE todo SET name = %s WHERE id = %s", (name, todo_id))
+            self.cur.execute(
+                "UPDATE todo SET name = %s WHERE id = %s", (name, todo_id))
         elif is_done is not None:
             self.cur.execute(
-                "UPDATE todo SET is_done = %s WHERE id = %s", (is_done, todo_id)
+                "UPDATE todo SET is_done = %s WHERE id = %s", (
+                    is_done, todo_id)
             )
         self.conn.commit()
 

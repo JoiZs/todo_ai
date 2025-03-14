@@ -2,4 +2,4 @@ dotenv
 openai
 openai-agents
 pydantic
-psycopg2
+psycopg2-binary
