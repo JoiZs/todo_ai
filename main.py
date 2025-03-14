@@ -1,15 +1,18 @@
 import dotenv
-from pydantic import BaseModel
-from agents import Agent, Runner
-
-
-class TodoOutput(BaseModel):
-    name: str
-    is_done: bool
+from main_agent import TodoAgent
+import asyncio
 
 
 if __name__ == "__main__":
     dotenv.load_dotenv()
-    todo_assistant = Agent(
-        name="Todo Assistant", instructions="You are a helpful assistant."
-    )
+
+    agent = TodoAgent()
+    while True:
+        user_input = input(
+            "I'm your Todo AI assistant. Ask me for a favor (or type 'quit' to exit): "
+        )
+        if user_input.lower() == "quit":
+            print("Exiting...")
+            break
+        else:
+            asyncio.run(agent.runagent(user_input))
