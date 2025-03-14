@@ -52,13 +52,42 @@ class TodoAgent:
             return todos
 
         @function_tool
+        async def update_is_done(name: str, new_status: bool) -> str:
+            try:
+                # Log the input values
+                logging.info(
+                    f"Attempting to update task '{name}' to new status: {'done' if new_status else 'not done'}"
+                )
+
+                # Find the todo task by name
+                todo = self.db.find_todo_by_name(name)
+
+                if todo is None:
+                    logging.warning(f"Task '{name}' not found.")
+                    return "Not found the task."
+
+                # Update the task's is_done status
+                self.db.update_is_done(todo.id, new_status)
+                logging.info(
+                    f"Task '{name}' updated to {'done' if new_status else 'not done'} successfully."
+                )
+
+            except Exception as e:
+                # Log the exception and return a generic error message
+                logging.error(f"Error updating task '{name}' status: {e}")
+                return "Cannot update the task's status."
+
+            return f"Task '{name}' status updated to {'done' if new_status else 'not done'}."
+
+        @function_tool
         async def reschedule_todo(name: str, new_time: str) -> str:
             try:
+                print(name, new_time)
                 todo = self.db.find_todo_by_name(name)
                 if todo is None:
                     logging.warning("Not found the task.")
                     return "Not found the task."
-                self.db.reschedule_todo_time(todo.id, todo.due_date)
+                self.db.reschedule_todo_time(todo.id, new_time)
             except Exception as e:
                 if e:
                     logging.error("Err at rescheduling a task.")
@@ -82,27 +111,39 @@ class TodoAgent:
             return "Deleted the task."
 
         @function_tool
-        async def update_todo(newtask: Task) -> str:
+        async def update_task_name(name: str, new_name: str) -> str:
             try:
-                todo = self.db.find_todo_by_name(newtask["name"])
-                if todo is None:
-                    logging.warning("Not found the task.")
-                    return "Not found the task."
-                self.db.update_todo(
-                    todo.id, newtask["name"], newtask["is_done"], newtask["due_date"]
+                # Log the input values
+                logging.info(
+                    f"Attempting to update task '{name}' to new name: {new_name}"
                 )
+
+                # Find the todo task by current name
+                todo = self.db.find_todo_by_name(name)
+
+                if todo is None:
+                    logging.warning(f"Task '{name}' not found.")
+                    return "Not found the task."
+
+                # Update the task's name
+                self.db.update_task_name(todo.id, new_name)
+                logging.info(
+                    f"Task '{name}' updated to new name: '{new_name}' successfully."
+                )
+
             except Exception as e:
-                if e:
-                    logging.error("Cannot update the task.")
-                    return "Cannot update the task."
-            logging.info("Updated a task.")
-            return "Updated the task."
+                # Log the exception and return a generic error message
+                logging.error(f"Error updating task '{name}' name: {e}")
+                return "Cannot update the task's name."
+
+            return f"Task name updated from '{name}' to '{new_name}'."
 
         @function_tool
         async def add_todo(task: Task) -> str:
             try:
                 print(task)
-                self.db.add_todo(task["name"], task["is_done"], task["due_date"])
+                self.db.add_todo(
+                    task["name"], task["is_done"], task["due_date"])
             except Exception as e:
                 if e:
                     logging.error("Cannot create a task.")
@@ -110,28 +151,17 @@ class TodoAgent:
             logging.info("Created a task.")
             return "Created a task."
 
-        @function_tool
-        async def add_todos(tasks: list[Task]) -> str:
-            try:
-                self.db.add_multiple_todos(tasks)
-            except Exception as e:
-                if e:
-                    logging.error("Cannot create tasks.")
-                    return "Cannot create tasks."
-            logging.info("Created tasks.")
-            return "Created tasks."
-
         self.manager_agent = Agent(
             name="Todo manager",
             instructions=f"You are a helpful todo manager. Do not use your own knowledge just use the provided tools. You job is to retrieve, reschedule and manage tasks list. Use utc current date time: {datetime.datetime.utcnow()}.",
             model="gpt-4o-mini",
             tools=[
                 get_todos,
-                add_todos,
                 add_todo,
                 reschedule_todo,
                 delete_todos,
-                update_todo,
+                update_is_done,
+                update_task_name,
             ],
         )
         self.organizer_agent = Agent(
@@ -180,4 +210,3 @@ class TodoAgent:
             print("*" * (len(result.final_output) + 4))
         except InputGuardrailTripwireTriggered:
             print("Please only asks questions about todos list.")
-        self.db.close()
