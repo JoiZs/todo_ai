@@ -142,8 +142,7 @@ class TodoAgent:
         async def add_todo(task: Task) -> str:
             try:
                 print(task)
-                self.db.add_todo(
-                    task["name"], task["is_done"], task["due_date"])
+                self.db.add_todo(task["name"], task["is_done"], task["due_date"])
             except Exception as e:
                 if e:
                     logging.error("Cannot create a task.")
@@ -153,7 +152,7 @@ class TodoAgent:
 
         self.manager_agent = Agent(
             name="Todo manager",
-            instructions=f"You are a helpful todo manager. Do not use your own knowledge just use the provided tools. You job is to retrieve, reschedule and manage tasks list. Use utc current date time: {datetime.datetime.utcnow()}.",
+            instructions=f"You are a helpful todo manager. Do not use your own knowledge just use the provided tools. You job is to retrieve, reschedule and manage tasks list. Use utc current date time: {datetime.datetime.utcnow()}. Use ISO 8601 format datetime.",
             model="gpt-4o-mini",
             tools=[
                 get_todos,

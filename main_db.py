@@ -84,10 +84,10 @@ class Db_psql:
     # RESCHEDULE: Only reschedule the time (update due_date)
 
     def reschedule_todo_time(self, todo_id: int, new_due_date: str) -> None:
-        new_due = datetime.strptime(
-            new_due_date, "%Y-%m-%d %H:%M:%S"
-        )  # Convert string to datetime
+        print(todo_id, new_due_date)
+        new_due = datetime.fromisoformat(new_due_date.replace("Z", "+00:00"))
 
+        print(todo_id, new_due)
         # Update only the due_date of the task
         self.cur.execute(
             "UPDATE todo SET due_date = %s WHERE id = %s", (new_due, todo_id)
