@@ -198,14 +198,13 @@ class TodoAgent:
             instructions="Determine which agent to use based on user's todo questions.",
             handoffs=[self.manager_agent, organizer_handoff],
             input_guardrails=[todo_guardrail],
+        
         )
 
     # ai agent runner
     async def runagent(self, req: str) -> None:
         try:
             result = await Runner.run(self.triage_agent, req)
-            print("*" * (len(result.final_output) + 4))
-            print(f"* {result.final_output} *")
-            print("*" * (len(result.final_output) + 4))
+            return result.final_output
         except InputGuardrailTripwireTriggered:
-            print("Please only asks questions about todos list.")
+            return ("Please only asks questions about todos list.")

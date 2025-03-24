@@ -3,3 +3,7 @@ openai
 openai-agents
 pydantic
 psycopg2-binary
+flask
+flask-socketio
+python-socketio
+eventlet
